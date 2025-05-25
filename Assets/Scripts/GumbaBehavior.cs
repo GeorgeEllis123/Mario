@@ -4,9 +4,6 @@ using UnityEngine.SceneManagement;
 public class GoombaController : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 1f;
-    [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private float groundCheckDistance = 0.1f;
     [SerializeField] private bool movesLeft;
 
     private Rigidbody2D rb;
