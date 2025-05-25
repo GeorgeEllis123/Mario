@@ -10,9 +10,22 @@ public class MarioMovement : MonoBehaviour
     [Header("Jump Settings")]
     [SerializeField] private float jumpForce = 16f;
     [SerializeField] private float jumpBufferTime = 0.1f;
-    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask groundLayers;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.1f;
+
+    [Header("Brick Stuff")]
+    [SerializeField] private LayerMask brickLayer;
+    [SerializeField] private LayerMask powerUpLayer;
+    [SerializeField] private float headCheckDistance = 0.1f;
+    [SerializeField] private Transform headCheckLeft;
+    [SerializeField] private Transform headCheckRight;
+
+    [Header("Gumba Stuff")]
+    [SerializeField] private float stompBounceForce = 12f;
+    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private Transform stompCheck;
+    [SerializeField] private float stompRadius = 0.2f;
 
     private Rigidbody2D rb;
     private bool isGrounded;
@@ -33,6 +46,9 @@ public class MarioMovement : MonoBehaviour
         HandleMovement();
         CheckGrounded();
         ProcessBufferedJump();
+        CheckHeadHit(headCheckLeft);
+        CheckHeadHit(headCheckRight);
+        CheckForStomp();
     }
 
     void HandleMovement()
@@ -68,15 +84,45 @@ public class MarioMovement : MonoBehaviour
 
     void CheckGrounded()
     {
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayers);
     }
 
-    void OnDrawGizmosSelected()
+    void CheckHeadHit(Transform headCheck)
     {
-        if (groundCheck != null)
+        RaycastHit2D brickHit = Physics2D.Raycast(headCheck.position, Vector2.up, headCheckDistance, brickLayer);
+        if (brickHit.collider != null)
         {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+            HandleBrickHit(brickHit.collider.gameObject);
+        }
+
+        RaycastHit2D powerUpHit = Physics2D.Raycast(headCheck.position, Vector2.up, headCheckDistance, powerUpLayer);
+        if (powerUpHit.collider != null)
+        {
+            HandlePowerUpHit(powerUpHit.collider.gameObject);
         }
     }
+
+    void HandleBrickHit(GameObject brick)
+    {
+        Destroy(brick, 0.1f);
+    }
+
+    void HandlePowerUpHit(GameObject powerUpBlock)
+    {
+        Debug.Log("Spawn power up");
+    }
+
+    void CheckForStomp()
+    {
+        Collider2D hit = Physics2D.OverlapCircle(stompCheck.position, stompRadius, enemyLayer);
+        if (hit != null)
+        {
+            if (rb.linearVelocity.y <= 0)
+            {
+                Destroy(hit.gameObject);
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, stompBounceForce);
+            }
+        }
+    }
+
 }
