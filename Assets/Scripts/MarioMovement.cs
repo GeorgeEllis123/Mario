@@ -109,7 +109,11 @@ public class MarioMovement : MonoBehaviour
 
     void HandlePowerUpHit(GameObject powerUpBlock)
     {
-        Debug.Log("Spawn power up");
+        PowerUpBrick powerUpScript = powerUpBlock.GetComponent<PowerUpBrick>();
+        if (powerUpScript != null && !powerUpScript.hasBeenHit)
+        {
+            powerUpScript.OnBrickHit();
+        }
     }
 
     void CheckForStomp()
